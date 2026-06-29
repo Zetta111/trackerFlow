@@ -23,10 +23,6 @@ public class Task {
     @JoinColumn(name="project_id",nullable=false)
     private Project project;
 
-    @ManyToOne
-    @JoinColumn(name="project_member_id",nullable=false)
-    private ProjectMember projectMember;
-
     @Column(name="description",nullable=true)
     private String description;
 
@@ -43,13 +39,13 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name="assigned_project_member",nullable=false)
-    private ProjectMember assignedMember;
+    private ProjectMember assignee;
 
     @Column(name="start_date",nullable=true)
     private LocalDate startDate;
 
-    @Column(name="end_date",nullable=true)
-    private LocalDate endDate;
+    @Column(name="due_date",nullable=true)
+    private LocalDate dueDate;
 
     @Column(name="created_at",nullable=false)
     private LocalDateTime createdAt;
