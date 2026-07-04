@@ -10,6 +10,7 @@ import java.util.List;
 public interface OrganizationMemberRepository extends JpaRepository<OrganizationMember,Long> {
 
     boolean existsByOrganizationAndUser(Organization organization,User user);
+    boolean existsByOrganizationIdAndUserIdAndStatus(Long organizationId,Long userId,OrganizationMemberStatus status);
     List<OrganizationMember>findByOrganizationAndStatus(Organization organization,OrganizationMemberStatus status);
     List<OrganizationMember>findByUserAndStatus(User user,OrganizationMemberStatus status);
 }
