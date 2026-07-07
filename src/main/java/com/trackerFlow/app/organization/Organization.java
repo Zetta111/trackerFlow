@@ -1,6 +1,7 @@
 package com.trackerFlow.app.organization;
 
 
+import com.trackerFlow.app.user.User;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -31,6 +32,10 @@ public class Organization {
     @Enumerated(EnumType.STRING)
     @Column(name="status",nullable=false)
     private OrganizationStatus status;
+
+    @ManyToOne
+    @JoinColumn(name="owner_id",nullable=false)
+    private User owner;
 
 
 }

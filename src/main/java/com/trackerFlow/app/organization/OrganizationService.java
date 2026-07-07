@@ -37,18 +37,26 @@ public class OrganizationService {
 
 
     @Transactional
-    public OrganizationResponseDto createOrganization(CreateOrganizationRequest request, Long userId) throws Exception {
-        if(organizationRepository.existsByNameIgnoreCase(request.name())){
-            throw new Exception("Name already taken");
+    public OrganizationResponseDto createOrganization(CreateOrganizationRequest request, Long currentUserId) throws Exception {
+        String normalizedName= request.name().trim();
+
+        if(normalizedName.isBlank()){
+            throw new Exception("Name cannot be blank");
         }
-        User currentUser = userRepository.findById(userId)
+
+        User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new RuntimeException("No account found"));
+
+        if(organizationRepository.existsByOwner_IdAndNameIgnoreCase(currentUserId,normalizedName)){
+            throw new Exception("Cannot have duplicate organization names");
+        }
 
         LocalDateTime now = LocalDateTime.now();
         Organization organization = new Organization();
-        organization.setName(request.name());
+        organization.setName(normalizedName);
         organization.setDescription(request.description());
         organization.setStatus(OrganizationStatus.ACTIVE);
+        organization.setOwner(currentUser);
         organization.setCreatedAt(now);
         organization.setUpdatedAt(now);
 
@@ -58,7 +66,7 @@ public class OrganizationService {
         organizationMember.setOrganization(savedOrganization);
         organizationMember.setUser(currentUser);
         organizationMember.setStatus(OrganizationMemberStatus.ACTIVE);
-        organizationMember.setRole(OrganizationMemberRole.OWNER);
+        organizationMember.setRole(OrganizationMemberRole.ADMIN);
         organizationMember.setJoinedAt(now);
         organizationMember.setUpdatedAt(now);
 
@@ -86,6 +94,8 @@ public class OrganizationService {
 
         return toOrganizationResponseDto(currentOrganization);
     }
+
+    
 
 
 }
