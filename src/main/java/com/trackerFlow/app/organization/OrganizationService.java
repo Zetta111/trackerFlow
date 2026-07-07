@@ -1,7 +1,9 @@
 package com.trackerFlow.app.organization;
 
 import com.trackerFlow.app.dto.request.CreateOrganizationRequest;
+import com.trackerFlow.app.dto.request.UpdateOrganizationReqeust;
 import com.trackerFlow.app.dto.response.OrganizationResponseDto;
+import com.trackerFlow.app.dto.response.UpdatedResponseDto;
 import com.trackerFlow.app.user.User;
 import com.trackerFlow.app.user.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,6 +112,45 @@ public class OrganizationService {
         currentOrganization.setStatus(OrganizationStatus.ARCHIVED);
         currentOrganization.setUpdatedAt(LocalDateTime.now());
         organizationRepository.save(currentOrganization);
+
+    }
+
+    @Transactional
+    public OrganizationResponseDto updateOrganization(UpdateOrganizationReqeust request,
+                                                      Long currentUserId,
+                                                      Long organizationId) throws Exception {
+        
+        Organization currentOrganization = organizationRepository.findById(organizationId)
+                .orElseThrow(()-> new RuntimeException("organization not found"));
+
+        if(currentOrganization.getStatus()== OrganizationStatus.ARCHIVED){
+            throw new Exception("Organization is Archived");
+        }
+
+        if(!Objects.equals(currentOrganization.getOwner().getId(), currentUserId)&&
+                !organizationMemberRepository.existsByOrganizationIdAndUserIdAndRoleAndStatus(organizationId
+                        ,currentUserId,
+                        OrganizationMemberRole.ADMIN,
+                        OrganizationMemberStatus.ACTIVE){
+            throw new Exception("You are not allowed to edit organization");
+        }
+
+        String currentName= request.name().trim();
+        String currentDescription= request.description();
+
+        if(organizationRepository.existsByOwner_IdAndNameIgnoreCaseAndIdNot(currentOrganization.getOwner().getId(),currentName,organizationId)){
+            throw new Exception("Name already used");
+        }
+        if(currentName.isBlank()||currentDescription.isBlank()){
+            throw new Exception("cannot leave fields blank");
+        }
+
+        currentOrganization.setName(currentName);
+        currentOrganization.setDescription(currentDescription);
+        currentOrganization.setUpdatedAt(LocalDateTime.now());
+        organizationRepository.save(currentOrganization);
+
+        return toOrganizationResponseDto(currentOrganization);
 
     }
 

@@ -10,5 +10,6 @@ public interface OrganizationRepository extends JpaRepository<Organization,Long>
 
     boolean existsByOwner_IdAndNameIgnoreCase(Long ownerId, String name);
     Organization findByName(String name);
+    boolean existsByOwner_IdAndNameIgnoreCaseAndIdNot(Long ownerId,String name,Long organizationId);
 
 }
