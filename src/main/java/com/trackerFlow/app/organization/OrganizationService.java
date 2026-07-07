@@ -8,8 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-
-
+import java.util.Objects;
 
 
 @Service
@@ -95,7 +94,26 @@ public class OrganizationService {
         return toOrganizationResponseDto(currentOrganization);
     }
 
-    
+    @Transactional
+    public void archiveOrganization(Long organizationId,Long currentUserId){
+        Organization currentOrganization= organizationRepository.findById(organizationId)
+                .orElseThrow(()-> new RuntimeException("Organization not found"));
+
+        if(!Objects.equals(currentUserId, currentOrganization.getOwner().getId())){
+            throw new RuntimeException("You dont have access to archive");
+        }
+
+        if(currentOrganization.getStatus()==OrganizationStatus.ARCHIVED){
+            throw new RuntimeException("Organization already archived");
+        }
+
+        currentOrganization.setStatus(OrganizationStatus.ARCHIVED);
+        currentOrganization.setUpdatedAt(LocalDateTime.now());
+        organizationRepository.save(currentOrganization);
+
+    }
+
+
 
 
 }
