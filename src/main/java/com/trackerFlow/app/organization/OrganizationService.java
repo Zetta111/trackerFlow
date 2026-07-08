@@ -119,7 +119,7 @@ public class OrganizationService {
     public OrganizationResponseDto updateOrganization(UpdateOrganizationReqeust request,
                                                       Long currentUserId,
                                                       Long organizationId) throws Exception {
-        
+
         Organization currentOrganization = organizationRepository.findById(organizationId)
                 .orElseThrow(()-> new RuntimeException("organization not found"));
 
@@ -131,7 +131,7 @@ public class OrganizationService {
                 !organizationMemberRepository.existsByOrganizationIdAndUserIdAndRoleAndStatus(organizationId
                         ,currentUserId,
                         OrganizationMemberRole.ADMIN,
-                        OrganizationMemberStatus.ACTIVE){
+                        OrganizationMemberStatus.ACTIVE)){
             throw new Exception("You are not allowed to edit organization");
         }
 
