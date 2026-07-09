@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project,Long> {
 
-    boolean existsByOrganizationAndName(String name,Organization organization);
+    boolean existsByOrganizationAndNameIgnoreCase(Organization organization,String name);
     List<Project> findByOrganizationAndStatus(Organization organization,ProjectStatus status);
 
     

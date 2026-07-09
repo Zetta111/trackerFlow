@@ -5,6 +5,7 @@ import com.trackerFlow.app.dto.response.ProjectResponseDto;
 import com.trackerFlow.app.organization.*;
 import com.trackerFlow.app.user.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -37,7 +38,7 @@ public class ProjectService {
     }
 
 
-
+    @Transactional
     public ProjectResponseDto createProject(CreateProjectRequest request, Long organizationId, Long currentUserId) throws Exception {
 
         Organization currentOrganization=organizationRepository.findById(organizationId)
@@ -50,11 +51,8 @@ public class ProjectService {
                 currentUserId, OrganizationMemberStatus.ACTIVE)
                 .orElseThrow(()->new RuntimeException("Organization Member not found"));
 
-        if(!Objects.equals(currentOrganization.getOwner().getId(), currentUserId)&&
-                !organizationMemberRepository.existsByOrganizationIdAndUserIdAndRoleAndStatus(organizationId
-                        ,currentUserId,
-                        OrganizationMemberRole.ADMIN,
-                        OrganizationMemberStatus.ACTIVE)){
+        if(!Objects.equals(currentOrganization.getOwner().getId(), currentUserId)&&(
+                organizationMember.getRole()!=OrganizationMemberRole.ADMIN)){
             throw new Exception("You are not allowed to create a project");
         }
 
@@ -62,12 +60,13 @@ public class ProjectService {
         if(currentName.isBlank()){
             throw new Exception("Name must be filled out");
         }
-        if(projectRepository.existsByOrganizationAndName(currentName,currentOrganization)){
+        if(projectRepository.existsByOrganizationAndNameIgnoreCase(currentOrganization,currentName)){
             throw new Exception("Name already exists");
         }
         LocalDateTime now = LocalDateTime.now();
         Project project= new Project();
         project.setName(currentName);
+        project.setOrganization(currentOrganization);
         project.setDescription(request.description());
         project.setCreatedAt(now);
         project.setUpdatedAt(now);
@@ -88,4 +87,5 @@ public class ProjectService {
     }
 
 
+    
 }
