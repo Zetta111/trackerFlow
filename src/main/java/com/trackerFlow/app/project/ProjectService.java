@@ -87,5 +87,20 @@ public class ProjectService {
     }
 
 
-    
+    public ProjectResponseDto getProject(Long organizationId,Long projectId,Long currentUserId){
+        Organization currentOrganization=organizationRepository.findById(organizationId)
+                .orElseThrow(()->new RuntimeException("Organization not found"));
+
+        Project currentProject=projectRepository.findById(projectId)
+                .orElseThrow(()-> new RuntimeException("Project not found"));
+
+        OrganizationMember currentOrganizationMember=organizationMemberRepository.findByOrganizationIdAndUserIdAndStatus(organizationId,currentUserId,OrganizationMemberStatus.ACTIVE)
+                .orElseThrow(()-> new RuntimeException("Not organization member found"));
+
+        if(!projectMemberRepository.existsByProjectAndOrganizationMember(currentProject,currentOrganizationMember)){
+            throw new RuntimeException("You are not part of this project");
+        }
+
+        return toProjectResponseDto(currentProject);
+    }
 }
