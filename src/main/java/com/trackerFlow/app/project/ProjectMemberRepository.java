@@ -12,4 +12,5 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember,Lon
 
     List<ProjectMember> findByProjectAndStatus(Project project,ProjectMemberStatus status);
     boolean existsByProjectAndOrganizationMember(Project project, OrganizationMember organizationMember);
+    List<ProjectMember> findByOrganizationMemberAndStatus(OrganizationMember organizationMember,ProjectMemberStatus status);
 }

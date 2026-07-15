@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -186,6 +187,33 @@ public class ProjectService {
         projectRepository.save(currentProject);
     }
 
+    public List<ProjectResponseDto> listActiveProjects(Long currentUserId,Long organizationId) throws Exception {
+        OrganizationMember currentOrganizationMember=organizationMemberRepository.findByOrganizationIdAndUserIdAndStatus(organizationId,currentUserId,OrganizationMemberStatus.ACTIVE)
+                .orElseThrow(()->new RuntimeException("organization member not found"));
+
+        Organization currentOrganization= organizationRepository.findById(organizationId)
+                .orElseThrow(()->new RuntimeException("organization not found"));
+
+        List<Project> projects =projectRepository.findByOrganizationAndStatus(currentOrganization,ProjectStatus.ACTIVE);
+
+        if(Objects.equals(currentOrganization.getOwner().getId(), currentUserId)||(
+                currentOrganizationMember.getRole()!=OrganizationMemberRole.ADMIN)){
+            return projects.stream()
+                    .map(this::toProjectResponseDto)
+                    .toList();
+        }else{
+            List<ProjectMember> projectMembers=projectMemberRepository.findByOrganizationMemberAndStatus(currentOrganizationMember,ProjectMemberStatus.ACTIVE);
+            return projectMembers.stream()
+                    .map(ProjectMember::getProject).map(this::toProjectResponseDto).toList();
+        }
+
+
+
+
+
+
+
+    }
 
 
 
